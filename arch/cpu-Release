@@ -23,15 +23,16 @@ src_dir="${0%/*}/.."
 # the raw address instead and keeping my fingers crossed.
 
 cmake \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DENABLE_INTEGRATED_TESTS=ON \
-  -DENABLE_UNIT_TESTS=ON \
-  -DBUILD_INTERNAL_KOKKOS=ON \
-  -DKokkos_ARCH_ZEN2=ON \
-  -DKokkos_ENABLE_PTHREAD=OFF \
-  -DKokkos_ENABLE_OPENMP=ON \
-  -DCMAKE_CXX_FLAGS="-g -O2 -rdynamic" \
-  $src_dir
+	-DCMAKE_CXX_COMPILER="clang++" \
+	-DCMAKE_C_COMPILER="clang" \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+	-DENABLE_INTEGRATED_TESTS=ON \
+	-DENABLE_UNIT_TESTS=OFF \
+	-DBUILD_INTERNAL_KOKKOS=ON \
+	-DKokkos_ENABLE_OPENMP=ON \
+	-DCMAKE_CXX_FLAGS="-g -O2" \
+	$src_dir
 
 #------------------------------------------------------------------------------#
 # vim: syntax=sh

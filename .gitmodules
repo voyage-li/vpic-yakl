@@ -1,3 +1,6 @@
 [submodule "kokkos"]
 	path = kokkos
 	url = https://github.com/kokkos/kokkos
+[submodule "YAKL"]
+	path = YAKL
+	url = git@github.com:anyin233/SWYAKL.git
