@@ -9,6 +9,7 @@
  */
 
 // #include "YAKL_Bounds_c.h"
+#include "YAKL_defines.h"
 #include "src/grid/grid.h"
 #include "src/util/util_base.h"
 #include "src/vpic/yakl_helpers.h"
@@ -1018,6 +1019,99 @@ template<> void begin_send_ghost_norm_e_kokkos<ZXY>(field_array_t* fa, const gri
         sbuf_d(1 + (y-1)*(nx+1) + (x-1)) = k_field(VOXEL(x,y,z,nx,ny,nz), field_var::ez);
     });
     Kokkos::deep_copy(sbuf_h, sbuf_d);
+    sbuf_h(0) = g->dz;
+    begin_send_port_k(i,j,k,size,g,reinterpret_cast<char*>(sbuf_h.data()));
+}
+
+// YAKL Port
+template<typename T> void begin_recv_ghost_norm_e_yakl(const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& rbuf_d, yakl::Array<float, 1, yakl::memHost>& rbuf_h) {}
+template<> void begin_recv_ghost_norm_e_yakl<XYZ>(const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& rbuf_d, yakl::Array<float, 1, yakl::memHost>& rbuf_h) {
+    const int ny = g->ny, nz = g->nz;
+    int size = ( 1 + (ny+1)*(nz+1) )*sizeof(float);
+// CPU
+    begin_recv_port_k(i,j,k,size,g, reinterpret_cast<char*>(rbuf_h.data()));
+// GPU
+//    begin_recv_port_k(i,j,k,size,g, reinterpret_cast<char*>(rbuf_d.data()));
+}
+template<> void begin_recv_ghost_norm_e_yakl<YZX>(const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& rbuf_d, yakl::Array<float, 1, yakl::memHost>& rbuf_h) {
+    const int nx = g->nx, nz = g->nz;
+    int size = ( 1 + (nx+1)*(nz+1) )*sizeof(float);
+// CPU
+    begin_recv_port_k(i,j,k,size,g, reinterpret_cast<char*>(rbuf_h.data()));
+// GPU
+//    begin_recv_port_k(i,j,k,size,g, reinterpret_cast<char*>(rbuf_d.data()));
+}
+template<> void begin_recv_ghost_norm_e_yakl<ZXY>(const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& rbuf_d, yakl::Array<float, 1, yakl::memHost>& rbuf_h) {
+    const int nx = g->nx, ny = g->ny;
+    int size = ( 1 + (nx+1)*(ny+1) )*sizeof(float);
+// CPU
+    begin_recv_port_k(i,j,k,size,g, reinterpret_cast<char*>(rbuf_h.data()));
+// GPU
+//    begin_recv_port_k(i,j,k,size,g, reinterpret_cast<char*>(rbuf_d.data()));
+}
+template<typename T> void begin_send_ghost_norm_e_yakl(field_array_t* fa, const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& sbuf_d, yakl::Array<float, 1, yakl::memHost>& sbuf_h) {}
+template<> void begin_send_ghost_norm_e_yakl<XYZ>(field_array_t* fa, const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& sbuf_d, yakl::Array<float, 1, yakl::memHost>& sbuf_h) {
+    const int nx = g->nx, ny = g->ny, nz = g->nz;
+    const int size = ( 1 + (ny+1)*(nz+1) )*sizeof(float);
+    y_field_t& y_field = fa->y_f_d;
+    const int face = (i+j+k)<0 ? 1 : nx;
+    const float dx = g->dx;
+
+    // Kokkos::MDRangePolicy<Kokkos::Rank<2>> zy_node({1, 1}, {nz+2, ny+2});
+    yakl::c::Bounds<2> zy_node({1, nz+2}, {1, ny+2});
+    yakl::c::parallel_for("begin_send_ghost_norm_e_kokkos<XYZ>", zy_node, KOKKOS_LAMBDA(const int z, const int y) {
+        if(z+y == 2) {
+            sbuf_d(0) = dx;
+        }
+        const int x = face;
+        sbuf_d(1 + (z-1)*(ny+1) + (y-1)) = y_field(VOXEL(x,y,z,nx,ny,nz), field_var::ex);
+    });
+    // Kokkos::deep_copy(sbuf_h, sbuf_d);
+    sbuf_d.deep_copy_to(sbuf_h);
+    sbuf_h(0) = g->dx;
+    begin_send_port_k(i,j,k,size,g,reinterpret_cast<char*>(sbuf_h.data()));
+}
+template<> void begin_send_ghost_norm_e_yakl<YZX>(field_array_t* fa, const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& sbuf_d, yakl::Array<float, 1, yakl::memHost>& sbuf_h) {
+    const int nx = g->nx, ny = g->ny, nz = g->nz;
+    const int size = ( 1 + (nx+1)*(nz+1) )*sizeof(float);
+    // k_field_t& k_field = fa->k_f_d;
+    y_field_t& y_field = fa->y_f_d;
+    const int face = (i+j+k)<0 ? 1 : ny;
+    const float dy = g->dy;
+    // Kokkos::MDRangePolicy<Kokkos::Rank<2>> zx_node({1, 1}, {nz+2, nx+2});
+    yakl::c::Bounds<2> zx_node({1, nz+2}, {1, nx+2});
+    yakl::c::parallel_for("begin_send_ghost_norm_e_kokkos<YZX>", zx_node, YAKL_LAMBDA(const int z, const int x) {
+        if(z+x == 2) {
+            sbuf_d(0) = dy;
+        }
+        const int y = face;
+        sbuf_d(1 + (z-1)*(nx+1) + (x-1)) = y_field(VOXEL(x,y,z,nx,ny,nz), field_var::ey);
+    });
+    // Kokkos::deep_copy(sbuf_h, sbuf_d);
+    sbuf_d.deep_copy_to(sbuf_h);
+    sbuf_h(0) = g->dy;
+    begin_send_port_k(i,j,k,size,g,reinterpret_cast<char*>(sbuf_h.data()));
+
+}
+template<> void begin_send_ghost_norm_e_yakl<ZXY>(field_array_t* fa, const grid_t* g, int i, int j, int k, yakl::Array<float, 1>& sbuf_d, yakl::Array<float, 1, yakl::memHost>& sbuf_h) {
+    const int nx = g->nx, ny = g->ny, nz = g->nz;
+    const int size = ( 1 + (nx+1)*(ny+1) )*sizeof(float);
+    // k_field_t& k_field = fa->k_f_d;
+    y_field_t& y_field = fa->y_f_d;
+    const int face = (i+j+k)<0 ? 1 : nz;
+    const float dz = g->dz;
+
+    // Kokkos::MDRangePolicy<Kokkos::Rank<2>> yx_node({1, 1}, {ny+2, nx+2});
+    yakl::c::Bounds<2> yx_node({1, ny+2}, {1, nx+2});
+    yakl::c::parallel_for("begin_send_ghost_norm_e_kokkos<ZXY>", yx_node, KOKKOS_LAMBDA(const int y, const int x) {
+        if(y+x == 2) {
+            sbuf_d(0) = dz;
+        }
+        const int z = face;
+        sbuf_d(1 + (y-1)*(nx+1) + (x-1)) = y_field(VOXEL(x,y,z,nx,ny,nz), field_var::ez);
+    });
+    // Kokkos::deep_copy(sbuf_h, sbuf_d);
+    sbuf_d.deep_copy_to(sbuf_h);
     sbuf_h(0) = g->dz;
     begin_send_port_k(i,j,k,size,g,reinterpret_cast<char*>(sbuf_h.data()));
 }
