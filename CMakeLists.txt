@@ -5,6 +5,7 @@
 
 cmake_minimum_required(VERSION 3.9)
 cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0079 NEW)
 
 #~----------------------------------------------------------------------------~#
 # VPIC project configuration
@@ -136,6 +137,24 @@ endif()
 
 # Allow files to be references from the root, (eg #include "src/vpic/vpic.h")
 include_directories(${PROJECT_SOURCE_DIR})
+
+#------------------------------------------------------------------------------#
+# YAKL
+#------------------------------------------------------------------------------#
+
+# YAKL is a header only library, just add it into project
+set(YAKL_HOME ./YAKL)
+
+# set(YAKL_HAVE_MPI ON)
+
+add_subdirectory(${YAKL_HOME} ./yakl)
+include_directories(${YAKL_HOME}/src
+                    ${YAKL_HOME}/external
+                    ${YAKL_HOME}/src/extensions
+                    ${YAKL_HOME}/src/extensions/intrinsics)
+
+include(${YAKL_HOME}/yakl_utils.cmake)
+
 
 #------------------------------------------------------------------------------#
 # Kokkos
@@ -453,6 +472,7 @@ else()
 endif()
 target_include_directories(vpic INTERFACE ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(vpic ${VPIC_EXPOSE} ${MPI_CXX_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} Kokkos::kokkos)
+# yakl_process_target(vpic ${VPIC_EXPOSE})
 target_compile_options(vpic ${VPIC_EXPOSE} ${MPI_C_COMPILE_FLAGS} ${KOKKOS_COMPILE_OPTIONS})
 
 macro(build_a_vpic name deck)
@@ -460,6 +480,7 @@ macro(build_a_vpic name deck)
     message(FATAL_ERROR "Could not find deck '${deck}'")
   endif()
   add_executable(${name} ${CMAKE_SOURCE_DIR}/deck/main.cc ${CMAKE_SOURCE_DIR}/deck/wrapper.cc ${VPIC_SRC})
+  yakl_process_target(${name})
   target_link_libraries(${name} vpic Kokkos::kokkos)
   target_compile_definitions(${name} PRIVATE INPUT_DECK="${deck}")
 endmacro(build_a_vpic)

@@ -16,6 +16,10 @@
 
 #include "../sf_interface/sf_interface.h"
 #include "Kokkos_DualView.hpp"
+// #include "YAKL_memory_spaces.h"
+// #include "YAKL_Array.h"
+// #include "YAKL_memory_spaces.h"
+#include "src/vpic/yakl_helpers.h"
 
 typedef int32_t species_id; // Must be 32-bit wide for particle_injector_t
 
@@ -143,15 +147,30 @@ class species_t {
         k_particles_t::HostMirror k_p_h;     // kokkos particles view on host
         k_particles_i_t::HostMirror k_p_i_h; // kokkos particles view on host
 
+        y_particles_t y_p_d;                 // yakl particles array on device
+        y_particles_i_t y_p_i_d;             // yakl particles array on device
+        y_particles_t_h y_p_h;               // yakl particles array on host
+        y_particles_i_t_h y_p_i_h;           // yakl particles array on host
+
         k_particle_copy_t k_pc_d;            // kokkos particles copy for movers view on device
         k_particle_i_copy_t k_pc_i_d;        // kokkos particles copy for movers view on device
 
         k_particle_copy_t::HostMirror k_pc_h;      // kokkos particles copy for movers view on host
         k_particle_i_copy_t::HostMirror k_pc_i_h;  // kokkos particles i copy for movers view on host
 
+        y_particle_copy_t y_pc_d;           // yakl particles copy for movers array on device
+        y_particle_i_copy_t y_pc_i_d;
+        y_particle_copy_t_h y_pc_h;
+        y_particle_i_copy_t_h y_pc_i_h;
+
         // Only need host versions
         k_particle_copy_t::HostMirror k_pr_h;      // kokkos particles copy for received particles
         k_particle_i_copy_t::HostMirror k_pr_i_h;  // kokkos particles i copy for received particles
+        y_particle_copy_t_h y_pr_h;
+        y_particle_i_copy_t_h y_pr_i_h;
+
+        // y_particle_copy_t y_pr_d;           // yakl particles copy for received particles
+        // y_particle_i_copy_t y_pr_i_d;
 
         k_particle_movers_t k_pm_d;         // kokkos particle movers on device
         k_particle_i_movers_t k_pm_i_d;         // kokkos particle movers on device
@@ -159,9 +178,17 @@ class species_t {
         k_particle_movers_t::HostMirror k_pm_h;  // kokkos particle movers on host
         k_particle_i_movers_t::HostMirror k_pm_i_h;  // kokkos particle movers on host
 
+        y_particle_movers_t y_pm_d;        // yakl particle movers on device
+        y_particle_i_movers_t y_pm_i_d;
+        y_particle_movers_t_h y_pm_h;
+        y_particle_i_movers_t_h y_pm_i_h;
+
         // TODO: what is an iterator here??
         k_counter_t k_nm_d;               // nm iterator
         k_counter_t::HostMirror k_nm_h;
+
+        y_counter_t y_nm_d;               // nm iterator
+        y_counter_t_h y_nm_h;
 
         // TODO: this should ultimatley be removeable.
         // This tracks the number of particles we need to move back to the device
@@ -181,12 +208,20 @@ class species_t {
         int64_t last_copied = -1;
 
         // Static allocations for the compressor
-        Kokkos::View<int*> unsafe_index;
-        Kokkos::View<int> clean_up_to_count;
-        Kokkos::View<int> clean_up_from_count;
-        Kokkos::View<int>::HostMirror clean_up_from_count_h;
-        Kokkos::View<int*> clean_up_from;
-        Kokkos::View<int*> clean_up_to;
+        // Kokkos::View<int*> unsafe_index;
+        // Kokkos::View<int> clean_up_to_count;
+        // Kokkos::View<int> clean_up_from_count;
+        // Kokkos::View<int>::HostMirror clean_up_from_count_h;
+        // Kokkos::View<int*> clean_up_from;
+        // Kokkos::View<int*> clean_up_to;
+
+        // TODO: after migrate compressor, uncomment these member variable
+        yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault> unsafe_index;
+        yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault> clean_up_to_count;
+        yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault> clean_up_from_count;
+        yakl::Array<int, 1, yakl::memHost, yakl::styleDefault> clean_up_from_count_h;
+        yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault> clean_up_from;
+        yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault> clean_up_to; 
 
         // Init Kokkos Particle Arrays
         species_t(int n_particles, int n_pmovers)
@@ -209,11 +244,11 @@ class species_t {
             k_pm_d = k_particle_movers_t("k_particle_movers", n_pmovers);
             k_pm_i_d = k_particle_i_movers_t("k_particle_movers_i", n_pmovers);
             k_nm_d = k_counter_t("k_nm"); // size 1 encoded in type
-            unsafe_index = Kokkos::View<int*>("safe index", 2*n_pmovers);
-            clean_up_to_count = Kokkos::View<int>("clean up to count");
-            clean_up_from_count = Kokkos::View<int>("clean up from count");
-            clean_up_from = Kokkos::View<int*>("clean up from", n_pmovers);
-            clean_up_to = Kokkos::View<int*>("clean up to", n_pmovers);
+            // unsafe_index = Kokkos::View<int*>("safe index", 2*n_pmovers);
+            // clean_up_to_count = Kokkos::View<int>("clean up to count");
+            // clean_up_from_count = Kokkos::View<int>("clean up from count");
+            // clean_up_from = Kokkos::View<int*>("clean up from", n_pmovers);
+            // clean_up_to = Kokkos::View<int*>("clean up to", n_pmovers);
 
             k_p_h = Kokkos::create_mirror_view(k_p_d);
             k_p_i_h = Kokkos::create_mirror_view(k_p_i_d);
@@ -226,7 +261,42 @@ class species_t {
 
             k_nm_h = Kokkos::create_mirror_view(k_nm_d);
 
-            clean_up_from_count_h = Kokkos::create_mirror_view(clean_up_from_count);
+            // clean_up_from_count_h = Kokkos::create_mirror_view(clean_up_from_count);
+            y_p_d = y_particles_t("y_particles", n_particles, PARTICLE_VAR_COUNT);
+            y_p_i_d = y_particles_i_t("y_particles_i", n_particles);
+            y_pc_d = y_particle_copy_t("y_particle_copy_for_movers", n_pmovers, PARTICLE_VAR_COUNT);
+            y_pc_i_d = y_particle_i_copy_t("y_particle_copy_for_movers_i", n_pmovers);
+            y_pr_h = y_particle_copy_t_h("y_particle_send_for_movers", n_pmovers, PARTICLE_VAR_COUNT);
+            y_pr_i_h = y_particle_i_copy_t_h("y_particle_send_for_movers_i", n_pmovers);
+            y_pm_d = y_particle_movers_t("y_particle_movers", n_pmovers, PARTICLE_MOVER_VAR_COUNT);
+            y_pm_i_d = y_particle_i_movers_t("y_particle_movers_i", n_pmovers);
+            y_nm_d = y_counter_t("y_nm", 1); // size 1 encoded in type
+            unsafe_index = yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>("safe index", 2 * n_pmovers);
+            clean_up_to_count = yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>("clean up to count", 1); 
+            clean_up_from_count = yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>("clean up from count", 1);
+            clean_up_from = yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>("clean up from", n_pmovers);
+            clean_up_to = yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>("clean up to", n_pmovers);
+
+            y_p_h = y_particles_t_h("y_particles on host", n_particles, PARTICLE_VAR_COUNT);
+            y_p_i_h = y_particles_i_t_h("y_particles_i on host", n_particles);
+            y_p_d.deep_copy_to(y_p_h);
+            y_p_i_d.deep_copy_to(y_p_i_h);
+
+            y_pc_h = y_particle_copy_t_h("y_particle_copy_for_movers on host", n_pmovers, PARTICLE_VAR_COUNT);
+            y_pc_i_h = y_particle_i_copy_t_h("y_particle_copy_for_movers_i on host", n_pmovers);
+            y_pc_d.deep_copy_to(y_pc_h);
+            y_pc_i_d.deep_copy_to(y_pc_i_h);
+            
+            y_pm_h = y_particle_movers_t_h("y_particle_send_for_movers", n_pmovers, PARTICLE_VAR_COUNT);
+            y_pm_i_h = y_particle_i_movers_t_h("y_particle_movers_i on host", n_pmovers);
+            y_pm_d.deep_copy_to(y_pm_h);
+            y_pm_i_d.deep_copy_to(y_pm_i_h);
+
+            y_nm_h = y_counter_t_h("y_nm on host", 1);
+            y_nm_d.deep_copy_to(y_nm_h);
+
+            clean_up_from_count_h = yakl::Array<int, 1, yakl::memHost, yakl::styleDefault>("clean up from count", 1); 
+            clean_up_from_count.deep_copy_to(clean_up_from_count_h);
         }
 
         /**

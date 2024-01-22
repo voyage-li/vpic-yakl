@@ -11,6 +11,7 @@
 // AFFECT ANY PRACTICAL SIMULATIONS.
 
 #include "../field_advance/field_advance.h"
+#include "src/vpic/yakl_helpers.h"
 // FIXME: SHOULD INCLUDE SPECIES_ADVANCE TOO ONCE READY
 
 /*****************************************************************************/
@@ -36,6 +37,9 @@ typedef struct interpolator_array {
   k_interpolator_t k_i_d;
   k_interpolator_t::HostMirror k_i_h;
 
+  y_interpolator_t y_i_d;
+  y_interpolator_t_h y_i_h;
+
   interpolator_array(int nv)
   {
       init_kokkos_interp(nv);
@@ -45,6 +49,8 @@ typedef struct interpolator_array {
   {
     k_i_d = k_interpolator_t("k_interpolators", nv);
     k_i_h = Kokkos::create_mirror_view(k_i_d);
+    y_i_d = y_interpolator_t("y_interpolator", nv, INTERPOLATOR_VAR_COUNT);
+    y_i_h = y_interpolator_t_h("y_interpolator on host", nv, INTERPOLATOR_VAR_COUNT);
   }
 
   /**

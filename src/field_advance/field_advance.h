@@ -9,6 +9,8 @@
 #include "../grid/grid.h"
 #include "../material/material.h"
 #include "../vpic/kokkos_helpers.h"
+#include "YAKL_memory_spaces.h"
+#include "src/vpic/yakl_helpers.h"
 
 // FIXME: UPDATE THIS COMMENT BLOCK AND MOVE IT INTO APPROPRIATE LOCATIONS
 //
@@ -239,64 +241,115 @@ typedef struct field_advance_kernels {
 
 typedef struct field_buffers
 {
-    Kokkos::View<float*>   xyz_sbuf_pos;
-    Kokkos::View<float*>   yzx_sbuf_pos;
-    Kokkos::View<float*>   zxy_sbuf_pos;
-    Kokkos::View<float*>   xyz_rbuf_pos;
-    Kokkos::View<float*>   yzx_rbuf_pos;
-    Kokkos::View<float*>   zxy_rbuf_pos;
-    Kokkos::View<float*>   xyz_sbuf_neg;
-    Kokkos::View<float*>   yzx_sbuf_neg;
-    Kokkos::View<float*>   zxy_sbuf_neg;
-    Kokkos::View<float*>   xyz_rbuf_neg;
-    Kokkos::View<float*>   yzx_rbuf_neg;
-    Kokkos::View<float*>   zxy_rbuf_neg;
+    // Kokkos::View<float*>   xyz_sbuf_pos;
+    // Kokkos::View<float*>   yzx_sbuf_pos;
+    // Kokkos::View<float*>   zxy_sbuf_pos;
+    // Kokkos::View<float*>   xyz_rbuf_pos;
+    // Kokkos::View<float*>   yzx_rbuf_pos;
+    // Kokkos::View<float*>   zxy_rbuf_pos;
+    // Kokkos::View<float*>   xyz_sbuf_neg;
+    // Kokkos::View<float*>   yzx_sbuf_neg;
+    // Kokkos::View<float*>   zxy_sbuf_neg;
+    // Kokkos::View<float*>   xyz_rbuf_neg;
+    // Kokkos::View<float*>   yzx_rbuf_neg;
+    // Kokkos::View<float*>   zxy_rbuf_neg;
+    yakl::Array<float, 1>  xyz_sbuf_pos;
+    yakl::Array<float, 1>  yzx_sbuf_pos;
+    yakl::Array<float, 1>  zxy_sbuf_pos;
+    yakl::Array<float, 1>  xyz_rbuf_pos;
+    yakl::Array<float, 1>  yzx_rbuf_pos;
+    yakl::Array<float, 1>  zxy_rbuf_pos;
+    yakl::Array<float, 1>  xyz_sbuf_neg;
+    yakl::Array<float, 1>  yzx_sbuf_neg;
+    yakl::Array<float, 1>  zxy_sbuf_neg;
+    yakl::Array<float, 1>  xyz_rbuf_neg;
+    yakl::Array<float, 1>  yzx_rbuf_neg;
+    yakl::Array<float, 1>  zxy_rbuf_neg;
 
-    Kokkos::View<float*>::HostMirror   xyz_sbuf_pos_h;
-    Kokkos::View<float*>::HostMirror   yzx_sbuf_pos_h;
-    Kokkos::View<float*>::HostMirror   zxy_sbuf_pos_h;
-    Kokkos::View<float*>::HostMirror   xyz_rbuf_pos_h;
-    Kokkos::View<float*>::HostMirror   yzx_rbuf_pos_h;
-    Kokkos::View<float*>::HostMirror   zxy_rbuf_pos_h;
-    Kokkos::View<float*>::HostMirror   xyz_sbuf_neg_h;
-    Kokkos::View<float*>::HostMirror   yzx_sbuf_neg_h;
-    Kokkos::View<float*>::HostMirror   zxy_sbuf_neg_h;
-    Kokkos::View<float*>::HostMirror   xyz_rbuf_neg_h;
-    Kokkos::View<float*>::HostMirror   yzx_rbuf_neg_h;
-    Kokkos::View<float*>::HostMirror   zxy_rbuf_neg_h;
-
+    yakl::Array<float, 1, yakl::memHost>  xyz_sbuf_pos_h;
+    yakl::Array<float, 1, yakl::memHost>  yzx_sbuf_pos_h;
+    yakl::Array<float, 1, yakl::memHost>  zxy_sbuf_pos_h;
+    yakl::Array<float, 1, yakl::memHost>  xyz_rbuf_pos_h;
+    yakl::Array<float, 1, yakl::memHost>  yzx_rbuf_pos_h;
+    yakl::Array<float, 1, yakl::memHost>  zxy_rbuf_pos_h;
+    yakl::Array<float, 1, yakl::memHost>  xyz_sbuf_neg_h;
+    yakl::Array<float, 1, yakl::memHost>  yzx_sbuf_neg_h;
+    yakl::Array<float, 1, yakl::memHost>  zxy_sbuf_neg_h;
+    yakl::Array<float, 1, yakl::memHost>  xyz_rbuf_neg_h;
+    yakl::Array<float, 1, yakl::memHost>  yzx_rbuf_neg_h;
+    yakl::Array<float, 1, yakl::memHost>  zxy_rbuf_neg_h;
+//    Kokkos::View<float*>::HostMirror   xyz_sbuf_pos_h;
+//    Kokkos::View<float*>::HostMirror   yzx_sbuf_pos_h;
+//    Kokkos::View<float*>::HostMirror   zxy_sbuf_pos_h;
+//    Kokkos::View<float*>::HostMirror   xyz_rbuf_pos_h;
+//    Kokkos::View<float*>::HostMirror   yzx_rbuf_pos_h;
+//    Kokkos::View<float*>::HostMirror   zxy_rbuf_pos_h;
+//    Kokkos::View<float*>::HostMirror   xyz_sbuf_neg_h;
+//    Kokkos::View<float*>::HostMirror   yzx_sbuf_neg_h;
+//    Kokkos::View<float*>::HostMirror   zxy_sbuf_neg_h;
+//    Kokkos::View<float*>::HostMirror   xyz_rbuf_neg_h;
+//    Kokkos::View<float*>::HostMirror   yzx_rbuf_neg_h;
+//    Kokkos::View<float*>::HostMirror   zxy_rbuf_neg_h;
+//
     field_buffers() {
         // User should try avoid calling this
     }
 
     field_buffers(int xyz_size, int yzx_size, int zxy_size) {
-        xyz_sbuf_pos = Kokkos::View<float*>("Send buffer for XYZ positive face", xyz_size);
-        xyz_rbuf_pos = Kokkos::View<float*>("Receive buffer for XYZ positive face", xyz_size);
-        yzx_sbuf_pos = Kokkos::View<float*>("Send buffer for YZX positive face", yzx_size);
-        yzx_rbuf_pos = Kokkos::View<float*>("Receive buffer for YZX positive face", yzx_size);
-        zxy_sbuf_pos = Kokkos::View<float*>("Send buffer for ZXY positive face", zxy_size);
-        zxy_rbuf_pos = Kokkos::View<float*>("Receive buffer for ZXY positive face", zxy_size);
+//         xyz_sbuf_pos = Kokkos::View<float*>("Send buffer for XYZ positive face", xyz_size);
+//         xyz_rbuf_pos = Kokkos::View<float*>("Receive buffer for XYZ positive face", xyz_size);
+//         yzx_sbuf_pos = Kokkos::View<float*>("Send buffer for YZX positive face", yzx_size);
+//         yzx_rbuf_pos = Kokkos::View<float*>("Receive buffer for YZX positive face", yzx_size);
+//         zxy_sbuf_pos = Kokkos::View<float*>("Send buffer for ZXY positive face", zxy_size);
+//         zxy_rbuf_pos = Kokkos::View<float*>("Receive buffer for ZXY positive face", zxy_size);
+// 
+//         xyz_sbuf_neg = Kokkos::View<float*>("Send buffer for XYZ negative face", xyz_size);
+//         xyz_rbuf_neg = Kokkos::View<float*>("Receive buffer for XYZ negative face", xyz_size);
+//         yzx_sbuf_neg = Kokkos::View<float*>("Send buffer for YZX negative face", yzx_size);
+//         yzx_rbuf_neg = Kokkos::View<float*>("Receive buffer for YZX negative face", yzx_size);
+//         zxy_sbuf_neg = Kokkos::View<float*>("Send buffer for ZXY negative face", zxy_size);
+//         zxy_rbuf_neg = Kokkos::View<float*>("Receive buffer for ZXY negative face", zxy_size);
+// 
+//         xyz_sbuf_pos_h = Kokkos::create_mirror_view(xyz_sbuf_pos);
+//         yzx_sbuf_pos_h = Kokkos::create_mirror_view(yzx_sbuf_pos);
+//         zxy_sbuf_pos_h = Kokkos::create_mirror_view(zxy_sbuf_pos);
+//         xyz_rbuf_pos_h = Kokkos::create_mirror_view(xyz_rbuf_pos);
+//         yzx_rbuf_pos_h = Kokkos::create_mirror_view(yzx_rbuf_pos);
+//         zxy_rbuf_pos_h = Kokkos::create_mirror_view(zxy_rbuf_pos);
+// 
+//         xyz_sbuf_neg_h = Kokkos::create_mirror_view(xyz_sbuf_neg);
+//         yzx_sbuf_neg_h = Kokkos::create_mirror_view(yzx_sbuf_neg);
+//         zxy_sbuf_neg_h = Kokkos::create_mirror_view(zxy_sbuf_neg);
+//         xyz_rbuf_neg_h = Kokkos::create_mirror_view(xyz_rbuf_neg);
+//         yzx_rbuf_neg_h = Kokkos::create_mirror_view(yzx_rbuf_neg);
+//         zxy_rbuf_neg_h = Kokkos::create_mirror_view(zxy_rbuf_neg);
+        xyz_sbuf_pos = yakl::Array<float, 1>("Send buffer for XYZ positive face", xyz_size);
+        xyz_rbuf_pos = yakl::Array<float, 1>("Receive buffer for XYZ positive face", xyz_size);
+        yzx_sbuf_pos = yakl::Array<float, 1>("Send buffer for YZX positive face", yzx_size);
+        yzx_rbuf_pos = yakl::Array<float, 1>("Receive buffer for YZX positive face", yzx_size);
+        zxy_sbuf_pos = yakl::Array<float, 1>("Send buffer for ZXY positive face", zxy_size);
+        zxy_rbuf_pos = yakl::Array<float, 1>("Receive buffer for ZXY positive face", zxy_size);
 
-        xyz_sbuf_neg = Kokkos::View<float*>("Send buffer for XYZ negative face", xyz_size);
-        xyz_rbuf_neg = Kokkos::View<float*>("Receive buffer for XYZ negative face", xyz_size);
-        yzx_sbuf_neg = Kokkos::View<float*>("Send buffer for YZX negative face", yzx_size);
-        yzx_rbuf_neg = Kokkos::View<float*>("Receive buffer for YZX negative face", yzx_size);
-        zxy_sbuf_neg = Kokkos::View<float*>("Send buffer for ZXY negative face", zxy_size);
-        zxy_rbuf_neg = Kokkos::View<float*>("Receive buffer for ZXY negative face", zxy_size);
+        xyz_sbuf_neg = yakl::Array<float, 1>("Send buffer for XYZ negative face", xyz_size);
+        xyz_rbuf_neg = yakl::Array<float, 1>("Receive buffer for XYZ negative face", xyz_size);
+        yzx_sbuf_neg = yakl::Array<float, 1>("Send buffer for YZX negative face", yzx_size);
+        yzx_rbuf_neg = yakl::Array<float, 1>("Receive buffer for YZX negative face", yzx_size);
+        zxy_sbuf_neg = yakl::Array<float, 1>("Send buffer for ZXY negative face", zxy_size);
+        zxy_rbuf_neg = yakl::Array<float, 1>("Receive buffer for ZXY negative face", zxy_size);
 
-        xyz_sbuf_pos_h = Kokkos::create_mirror_view(xyz_sbuf_pos);
-        yzx_sbuf_pos_h = Kokkos::create_mirror_view(yzx_sbuf_pos);
-        zxy_sbuf_pos_h = Kokkos::create_mirror_view(zxy_sbuf_pos);
-        xyz_rbuf_pos_h = Kokkos::create_mirror_view(xyz_rbuf_pos);
-        yzx_rbuf_pos_h = Kokkos::create_mirror_view(yzx_rbuf_pos);
-        zxy_rbuf_pos_h = Kokkos::create_mirror_view(zxy_rbuf_pos);
+        xyz_sbuf_pos_h = yakl::Array<float, 1, yakl::memHost>("Send buffer for XYZ positive face on host", xyz_size);
+        yzx_sbuf_pos_h = yakl::Array<float, 1, yakl::memHost>("Receive buffer for XYZ postivie face on host", xyz_size);
+        zxy_sbuf_pos_h = yakl::Array<float, 1, yakl::memHost>("Send buffer for YZX positive face on host", yzx_size);
+        xyz_rbuf_pos_h = yakl::Array<float, 1, yakl::memHost>("Receive buffer for YZX positive face on host", yzx_size);
+        yzx_rbuf_pos_h = yakl::Array<float, 1, yakl::memHost>("Send buffer for ZXY positive face on host", zxy_size);
+        zxy_rbuf_pos_h = yakl::Array<float, 1, yakl::memHost>("Receive buffer for ZXY positive face on host", zxy_size);
 
-        xyz_sbuf_neg_h = Kokkos::create_mirror_view(xyz_sbuf_neg);
-        yzx_sbuf_neg_h = Kokkos::create_mirror_view(yzx_sbuf_neg);
-        zxy_sbuf_neg_h = Kokkos::create_mirror_view(zxy_sbuf_neg);
-        xyz_rbuf_neg_h = Kokkos::create_mirror_view(xyz_rbuf_neg);
-        yzx_rbuf_neg_h = Kokkos::create_mirror_view(yzx_rbuf_neg);
-        zxy_rbuf_neg_h = Kokkos::create_mirror_view(zxy_rbuf_neg);
+        xyz_sbuf_neg_h = yakl::Array<float, 1, yakl::memHost>("Send buffer for XYZ negative face on host", xyz_size);
+        yzx_sbuf_neg_h = yakl::Array<float, 1, yakl::memHost>("Receive buffer for XYZ negative face on host", xyz_size);
+        zxy_sbuf_neg_h = yakl::Array<float, 1, yakl::memHost>("Send buffer for YZX negative face on host", yzx_size);
+        xyz_rbuf_neg_h = yakl::Array<float, 1, yakl::memHost>("Receive buffer for YZX negative face on host", yzx_size);
+        yzx_rbuf_neg_h = yakl::Array<float, 1, yakl::memHost>("Send buffer for ZXY negative face on host", zxy_size);
+        zxy_rbuf_neg_h = yakl::Array<float, 1, yakl::memHost>("Receive buffer for ZXY negative face on host", zxy_size);
     }
 } field_buffers_t;
 // A field_array holds all the field quanties and pointers to
@@ -317,12 +370,21 @@ typedef struct field_array {
   k_field_sa_t k_field_sa_d;
   k_field_edge_t k_fe_d;             // Kokkos field_edge data (part of field_t) on device
   k_field_edge_t::HostMirror k_fe_h; // Kokkos field_edge data on host
+  y_field_t y_f_d;
+  y_field_t_h y_f_h;
+  // TODO: missing replacement of scatterview in YAKL
+  y_field_edge_t y_fe_d;
+  y_field_edge_t_h y_fe_h;
 
   k_field_accum_t k_f_rhob_accum_d;//TODO: Remove when absorbing pbc on device
   k_field_accum_t::HostMirror k_f_rhob_accum_h;
+  y_field_accum_t y_f_rhob_accum_d;
+  y_field_accum_t_h y_f_rhob_accum_h;
 
   k_jf_accum_t k_jf_accum_d;
   k_jf_accum_t::HostMirror k_jf_accum_h;
+  y_jf_accum_t y_jf_accum_d;
+  y_jf_accum_t_h y_jf_accum_h;
 
   // Step when the field was last copied to to the host.  The copy can
   // take place at any time during the step, so checking
@@ -351,11 +413,21 @@ typedef struct field_array {
       k_f_h = Kokkos::create_mirror_view(k_f_d);
       k_fe_h = Kokkos::create_mirror_view(k_fe_d);
 
+      y_f_d = y_field_t("y_fields", n_fields, FIELD_VAR_COUNT);
+      y_f_h = y_field_t_h("y_fields on host", n_fields, FIELD_VAR_COUNT);
+      y_fe_d = y_field_edge_t("y_field_edges", n_fields, FIELD_EDGE_COUNT);
+      y_fe_h = y_field_edge_t_h("y_field_edges on host", n_fields, FIELD_EDGE_COUNT);
+
       k_f_rhob_accum_d = k_field_accum_t("k_rhob_accum", n_fields);
       k_f_rhob_accum_h = Kokkos::create_mirror_view(k_f_rhob_accum_d);
+      y_f_rhob_accum_d = y_field_accum_t("y_f_rhob_accum", n_fields);
+      y_f_rhob_accum_h = y_field_accum_t_h("y_f_rhob_accum", n_fields);
 
       k_jf_accum_d = k_jf_accum_t("k_jf_accum", n_fields);
       k_jf_accum_h = Kokkos::create_mirror_view(k_jf_accum_d);
+      y_jf_accum_d = y_jf_accum_t("y_jf_accum", n_fields, NUM_J_DIMS);
+      y_jf_accum_h = y_jf_accum_t_h("y_jf_accum on host", n_fields, NUM_J_DIMS);
+
 
       fb = new field_buffers_t(xyz_sz, yzx_sz, zxy_sz);
   }

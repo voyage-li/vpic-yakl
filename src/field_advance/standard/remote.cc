@@ -8,6 +8,8 @@
  *
  */
 
+#include "YAKL_memory_spaces.h"
+#include "src/grid/grid.h"
 #define IN_sfa
 #include "sfa_private.h"
 #include "mpi.h"
@@ -140,6 +142,9 @@ end_remote_ghost_tang_b( field_t      * ALIGNED(128) field,
 typedef class XYZ {} XYZ;
 typedef class YZX {} YZX;
 typedef class ZXY {} ZXY;
+
+template <typename T> void begin_recv_yakl(const grid_t *g, int i, int j, int k, int nx, int ny, int nz, yakl::Array<float, 1> &rbuf, yakl::Array<float, 1, yakl::memHost> &rbuf_h) {
+}
 
 template <typename T> void begin_recv_kokkos(const grid_t* g, int i, int j, int k, int nx, int ny, int nz, Kokkos::View<float*>& rbuf, Kokkos::View<float*>::HostMirror& rbuf_h) {
 }

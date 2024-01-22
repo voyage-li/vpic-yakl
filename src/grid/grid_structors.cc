@@ -9,6 +9,7 @@
  */
 
 #include "grid.h"
+#include "src/util/checkpt/checkpt.h"
 
 /* Though these functions are not part of grid's public API, they must
    not be declared as static */
@@ -20,6 +21,7 @@ checkpt_grid( const grid_t * g ) {
   if( g->neighbor ) CHECKPT_ALIGNED( g->neighbor, 6*g->nv, 128 );
   CHECKPT_PTR( g->mp );
   CHECKPT_PTR( g->mp_k );
+  CHECKPT_PTR( g->mp_y );
 }
 
 grid_t *
@@ -30,6 +32,7 @@ restore_grid( void ) {
   if( g->neighbor ) RESTORE_ALIGNED( g->neighbor );
   RESTORE_PTR( g->mp );
   RESTORE_PTR( g->mp_k );
+  RESTORE_PTR( g->mp_y );
   return g;
 }
 
@@ -45,6 +48,7 @@ new_grid( void ) {
   g->bc[BOUNDARY(0,0,0)] = world_rank;
   g->mp = new_mp( 27 );
   g->mp_k = new_mp( 27 );
+  g->mp_y = new_mp(27);
   REGISTER_OBJECT( g, checkpt_grid, restore_grid, NULL );
   return g;
 }
@@ -57,6 +61,7 @@ delete_grid( grid_t * g ) {
   FREE_ALIGNED( g->range );
   delete_mp( g->mp );
   delete_mp( g->mp_k );
+  delete_mp( g->mp_y );
 //    delete_mp_kokkos(g->mp_k);
   FREE( g );
 }

@@ -14,7 +14,19 @@
  * @param np Num particles
  * @param sp Species operating on
  */
+#include "src/species_advance/species_advance.h"
+#include "src/vpic/yakl_helpers.h"
 struct DefaultCompress {
+    static void compress(
+        y_particles_t particles,
+        y_particles_i_t particles_i,
+        y_particle_i_movers_t particle_movers_i,
+        const int32_t nm,
+        const int32_t np,
+        species_t* sp
+    ) {
+        
+    }
     static void compress(
             k_particles_t particles,
             k_particles_i_t particles_i,

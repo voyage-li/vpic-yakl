@@ -1,4 +1,6 @@
 #include "grid.h"
+#include "src/util/mp/mp.h"
+#include "src/util/util_base.h"
 
 // FIXME: THIS CODE IS PRETTY SILLY AT THIS POINT
 
@@ -57,6 +59,44 @@ end_send_port( int i, int j, int k,
   int port = BOUNDARY( i, j, k), dst = g->bc[port];
   if( dst<0 || dst>=world_size ) return;
   mp_end_send( g->mp, BOUNDARY(i,j,k) );
+}
+
+void begin_recv_port_y (int i, int j, int k,
+                        int size,
+                        const grid_t *g,
+                        char* recv_buf) {
+  int port = BOUNDARY(-i, -j, -k), src = g->bc[port];
+  if ( src < 0 || src >= world_size) return;
+  mp_set_recv_buffer(g->mp_y, port, size, recv_buf);
+  mp_begin_recv(g->mp_y, port, size, src, BOUNDARY(i, j, k));
+}
+
+void *
+end_recv_port_y(int i, int j, int k, 
+                const grid_t *g) {
+  int port = BOUNDARY(-i,-j,-k), src = g->bc[port];
+  if( src<0 || src>=world_size ) return NULL;
+  mp_end_recv( g->mp_y, port );
+  mp_unset_recv_buffer(g->mp_y, port);
+  return mp_send_buffer( g->mp_y, port );
+}
+
+void begin_send_port_y(int i, int j, int k,
+                       int size,
+                       const grid_t * g,
+                       char * send_buf) {
+  int port = BOUNDARY(i, j, k), dst = g->bc[port];
+  if ( dst < 0 || dst > world_size) return;
+  mp_set_send_buffer(g->mp_y, port, size, send_buf);
+  mp_begin_send(g->mp_y, port, size, dst, port);
+}
+
+void end_send_port_y(int i, int j, int k,
+                     const grid_t * g) {
+  int port = BOUNDARY(i, j, k), dst = g->bc[port];
+  if (dst < 0 || dst > world_size) return;
+  mp_end_send(g->mp_y, BOUNDARY(i, j, k));
+  mp_unset_send_buffer(g->mp_y, port);
 }
 
 // Kokkos
