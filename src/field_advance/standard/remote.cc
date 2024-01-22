@@ -894,6 +894,9 @@ template<typename T> void end_send_kokkos(const grid_t* g, int i, int j, int k) 
     end_send_port_k(i,j,k, g);
 }
 
+template<typename T> void end_send_yakl(const grid_t* g, int i, int j, int k) {
+    end_send_port_k(i,j,k, g);
+}
 void
 k_end_remote_ghost_tang_b( field_array_t      * RESTRICT field,
                          const grid_t *              g) {
@@ -920,19 +923,19 @@ kokkos_end_remote_ghost_tang_b( field_array_t      * RESTRICT field,
                             field_buffers_t&        f_buffers) {
     const int nx = g->nx, ny = g->ny, nz = g->nz;
 
-    end_recv_kokkos<XYZ>(g, field, -1, 0, 0, nx, ny, nz, f_buffers.xyz_rbuf_neg, f_buffers.xyz_rbuf_neg_h);
-    end_recv_kokkos<YZX>(g, field, 0, -1, 0, nx, ny, nz, f_buffers.yzx_rbuf_neg, f_buffers.yzx_rbuf_neg_h);
-    end_recv_kokkos<ZXY>(g, field, 0, 0, -1, nx, ny, nz, f_buffers.zxy_rbuf_neg, f_buffers.zxy_rbuf_neg_h);
-    end_recv_kokkos<XYZ>(g, field, 1, 0, 0,  nx, ny, nz, f_buffers.xyz_rbuf_pos, f_buffers.xyz_rbuf_pos_h);
-    end_recv_kokkos<YZX>(g, field, 0, 1, 0,  nx, ny, nz, f_buffers.yzx_rbuf_pos, f_buffers.yzx_rbuf_pos_h);
-    end_recv_kokkos<ZXY>(g, field, 0, 0, 1,  nx, ny, nz, f_buffers.zxy_rbuf_pos, f_buffers.zxy_rbuf_pos_h);
+    end_recv_yakl<XYZ>(g, field, -1, 0, 0, nx, ny, nz, f_buffers.xyz_rbuf_neg, f_buffers.xyz_rbuf_neg_h);
+    end_recv_yakl<YZX>(g, field, 0, -1, 0, nx, ny, nz, f_buffers.yzx_rbuf_neg, f_buffers.yzx_rbuf_neg_h);
+    end_recv_yakl<ZXY>(g, field, 0, 0, -1, nx, ny, nz, f_buffers.zxy_rbuf_neg, f_buffers.zxy_rbuf_neg_h);
+    end_recv_yakl<XYZ>(g, field, 1, 0, 0,  nx, ny, nz, f_buffers.xyz_rbuf_pos, f_buffers.xyz_rbuf_pos_h);
+    end_recv_yakl<YZX>(g, field, 0, 1, 0,  nx, ny, nz, f_buffers.yzx_rbuf_pos, f_buffers.yzx_rbuf_pos_h);
+    end_recv_yakl<ZXY>(g, field, 0, 0, 1,  nx, ny, nz, f_buffers.zxy_rbuf_pos, f_buffers.zxy_rbuf_pos_h);
 
-    end_send_kokkos<XYZ>(g, -1,0,0);
-    end_send_kokkos<YZX>(g, 0,-1,0);
-    end_send_kokkos<ZXY>(g, 0,0,-1);
-    end_send_kokkos<XYZ>(g, 1,0,0);
-    end_send_kokkos<YZX>(g, 0,1,0);
-    end_send_kokkos<ZXY>(g, 0,0,1);
+    end_send_yakl<XYZ>(g, -1,0,0);
+    end_send_yakl<YZX>(g, 0,-1,0);
+    end_send_yakl<ZXY>(g, 0,0,-1);
+    end_send_yakl<XYZ>(g, 1,0,0);
+    end_send_yakl<YZX>(g, 0,1,0);
+    end_send_yakl<ZXY>(g, 0,0,1);
 }
 
 template<typename T> void begin_recv_ghost_norm_e_kokkos(const grid_t* g, int i, int j, int k, Kokkos::View<float*>& rbuf_d, Kokkos::View<float*>::HostMirror& rbuf_h) {}
