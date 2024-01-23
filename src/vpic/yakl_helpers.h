@@ -26,9 +26,9 @@ typedef int16_t material_id;
 // Memory location has been set to memDefault, which will be controled by
 // library
 
-// TODO: In yakl, memDevice will be set to memHost for CPU and SW runtime, and 
+// TODO: In yakl, memDevice will be set to memHost for CPU and SW runtime, and
 //       will be set to memDevice for CUDA, HIP and SYCL.
-//       To migrate this program to YAKL, we should create some DS specify for 
+//       To migrate this program to YAKL, we should create some DS specify for
 //       host because there is not HostMirror in YAKL.
 using y_counter_t = yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>;
 // replacement of HostMirror in YAKL
@@ -41,14 +41,14 @@ using y_field_edge_t =
 using y_field_accum_t =
     yakl::Array<float, 1, yakl::memDefault, yakl::styleDefault>;
 using y_field_t_h = yakl::Array<float, 2, yakl::memHost, yakl::styleDefault>;
-using y_field_edge_t_h = 
+using y_field_edge_t_h =
     yakl::Array<material_id, 2, yakl::memHost, yakl::styleDefault>;
-using y_field_accum_t_h = 
+using y_field_accum_t_h =
     yakl::Array<float, 1, yakl::memHost, yakl::styleDefault>;
 
 using y_jf_accum_t =
     yakl::Array<float, 2, yakl::memDefault, yakl::styleDefault>;
-using y_jf_accum_t_h = 
+using y_jf_accum_t_h =
     yakl::Array<float, 2, yakl::memHost, yakl::styleDefault>;
 
 using y_particles_t =
@@ -58,7 +58,7 @@ using y_particles_i_t =
 // replacement of HostMirror in YAKL
 using y_particles_t_h =
     yakl::Array<float, 2, yakl::memHost, yakl::styleDefault>;
-using y_particles_i_t_h = 
+using y_particles_i_t_h =
     yakl::Array<int, 1, yakl::memHost, yakl::styleDefault>;
 
 using y_particle_copy_t =
@@ -66,9 +66,9 @@ using y_particle_copy_t =
 using y_particle_i_copy_t =
     yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>;
 // replacement of HostMirror in YAKL
-using y_particle_copy_t_h = 
+using y_particle_copy_t_h =
     yakl::Array<float, 2, yakl::memHost, yakl::styleDefault>;
-using y_particle_i_copy_t_h = 
+using y_particle_i_copy_t_h =
     yakl::Array<int, 1, yakl::memHost, yakl::styleDefault>;
 
 using y_particle_movers_t =
@@ -76,20 +76,19 @@ using y_particle_movers_t =
 using y_particle_i_movers_t =
     yakl::Array<int, 1, yakl::memDefault, yakl::styleDefault>;
 // replacement of HostMirror in YAKL
-using y_particle_movers_t_h = 
+using y_particle_movers_t_h =
     yakl::Array<float, 2, yakl::memHost, yakl::styleDefault>;
-using y_particle_i_movers_t_h = 
+using y_particle_i_movers_t_h =
     yakl::Array<int, 1, yakl::memHost, yakl::styleDefault>;
-
 
 using y_neighbor_t =
     yakl::Array<int64_t, 1, yakl::memDefault, yakl::styleDefault>;
-using y_neighbor_t_h = 
+using y_neighbor_t_h =
     yakl::Array<int64_t, 1, yakl::memHost, yakl::styleDefault>;
 
 using y_interpolator_t =
     yakl::Array<float, 2, yakl::memDefault, yakl::styleDefault>;
-using y_interpolator_t_h = 
+using y_interpolator_t_h =
     yakl::Array<float, 2, yakl::memHost, yakl::styleDefault>;
 
 using y_accumulators_t =
@@ -105,135 +104,161 @@ using y_material_coefficient_t =
 
 // TODO: replacement of parallel_for_simd
 
-namespace yakl_port {
-namespace field_var {
-enum f_v {
-  ex = 0,
-  ey = 1,
-  ez = 2,
-  div_e_err = 3,
-  cbx = 4,
-  cby = 5,
-  cbz = 6,
-  div_b_err = 7,
-  tcax = 8,
-  tcay = 9,
-  tcaz = 10,
-  rhob = 11,
-  jfx = 12,
-  jfy = 13,
-  jfz = 14,
-  rhof = 15
-};
-};
-namespace field_edge_var {
-enum f_e_v {
-  ematx = 0,
-  ematy = 1,
-  ematz = 2,
-  nmat = 3,
-  fmatx = 4,
-  fmaty = 5,
-  fmatz = 6,
-  cmat = 7
-};
-};
+namespace yakl_port
+{
+    namespace field_var
+    {
+        enum f_v
+        {
+            ex = 0,
+            ey = 1,
+            ez = 2,
+            div_e_err = 3,
+            cbx = 4,
+            cby = 5,
+            cbz = 6,
+            div_b_err = 7,
+            tcax = 8,
+            tcay = 9,
+            tcaz = 10,
+            rhob = 11,
+            jfx = 12,
+            jfy = 13,
+            jfz = 14,
+            rhof = 15
+        };
+    };
+    namespace field_edge_var
+    {
+        enum f_e_v
+        {
+            ematx = 0,
+            ematy = 1,
+            ematz = 2,
+            nmat = 3,
+            fmatx = 4,
+            fmaty = 5,
+            fmatz = 6,
+            cmat = 7
+        };
+    };
 
-namespace interpolator_var {
-enum i_r {
-  ex = 0,
-  dexdy = 1,
-  dexdz = 2,
-  d2exdydz = 3,
-  ey = 4,
-  deydz = 5,
-  deydx = 6,
-  d2eydzdx = 7,
-  ez = 8,
-  dezdx = 9,
-  dezdy = 10,
-  d2ezdxdy = 11,
-  cbx = 12,
-  dcbxdx = 13,
-  cby = 14,
-  dcbydy = 15,
-  cbz = 16,
-  dcbzdz = 17
-};
-};
+    namespace interpolator_var
+    {
+        enum i_r
+        {
+            ex = 0,
+            dexdy = 1,
+            dexdz = 2,
+            d2exdydz = 3,
+            ey = 4,
+            deydz = 5,
+            deydx = 6,
+            d2eydzdx = 7,
+            ez = 8,
+            dezdx = 9,
+            dezdy = 10,
+            d2ezdxdy = 11,
+            cbx = 12,
+            dcbxdx = 13,
+            cby = 14,
+            dcbydy = 15,
+            cbz = 16,
+            dcbzdz = 17
+        };
+    };
 
-namespace particle_var {
-enum p_v {
-  dx = 0,
-  dy,
-  dz,
-  // pi = 3,
-  ux,
-  uy,
-  uz,
-  w,
-};
-};
+    namespace particle_var
+    {
+        enum p_v
+        {
+            dx = 0,
+            dy,
+            dz,
+            // pi = 3,
+            ux,
+            uy,
+            uz,
+            w,
+        };
+    };
 
-namespace particle_mover_var {
-enum p_m_v {
-  dispx = 0,
-  dispy = 1,
-  dispz = 2,
-  // pmi   = 3,
-};
-};
+    namespace particle_mover_var
+    {
+        enum p_m_v
+        {
+            dispx = 0,
+            dispy = 1,
+            dispz = 2,
+            // pmi   = 3,
+        };
+    };
 
-namespace accumulator_var {
-enum a_v {
-  jx = 0,
-  jy = 1,
-  jz = 2,
-};
-};
+    namespace accumulator_var
+    {
+        enum a_v
+        {
+            jx = 0,
+            jy = 1,
+            jz = 2,
+        };
+    };
 
-namespace material_coeff_var {
-enum mc_v {
-  decayx = 0,
-  drivex = 1,
-  decayy = 2,
-  drivey = 3,
-  decayz = 4,
-  drivez = 5,
-  rmux = 6,
-  rmuy = 7,
-  rmuz = 8,
-  nonconductive = 9,
-  epsx = 10,
-  epsy = 11,
-  epsz = 12,
-};
-};
+    namespace material_coeff_var
+    {
+        enum mc_v
+        {
+            decayx = 0,
+            drivex = 1,
+            decayy = 2,
+            drivey = 3,
+            decayz = 4,
+            drivez = 5,
+            rmux = 6,
+            rmuy = 7,
+            rmuz = 8,
+            nonconductive = 9,
+            epsx = 10,
+            epsy = 11,
+            epsz = 12,
+        };
+    };
 
-namespace hydro_var {
-enum h_v {
-  jx = 0,
-  jy = 1,
-  jz = 2,
-  rho = 3,
-  px = 4,
-  py = 5,
-  pz = 6,
-  ke = 7,
-  txx = 8,
-  tyy = 9,
-  tzz = 10,
-  tyz = 11,
-  tzx = 12,
-  txy = 13,
-};
-};
+    namespace hydro_var
+    {
+        enum h_v
+        {
+            jx = 0,
+            jy = 1,
+            jz = 2,
+            rho = 3,
+            px = 4,
+            py = 5,
+            pz = 6,
+            ke = 7,
+            txx = 8,
+            tyy = 9,
+            tzz = 10,
+            tyz = 11,
+            tzx = 12,
+            txy = 13,
+        };
+    };
 } // namespace yakl_port
 
 void print_particles_d(
     y_particles_t particles,
-    int np
-);
+    int np);
 
+template <class Scalar>
+struct MinMaxScalar_y
+{
+    Scalar min_val, max_val;
+    YAKL_INLINE void operator=(const MinMaxScalar_y &rhs)
+    {
+        min_val = rhs.min_val;
+        max_val = rhs.max_val;
+    }
+};
 
 #endif //_yakl_helpers_h_
