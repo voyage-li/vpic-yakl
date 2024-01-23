@@ -61,7 +61,8 @@ end_send_port( int i, int j, int k,
   mp_end_send( g->mp, BOUNDARY(i,j,k) );
 }
 
-void begin_recv_port_y (int i, int j, int k,
+void 
+begin_recv_port_y (int i, int j, int k,
                         int size,
                         const grid_t *g,
                         char* recv_buf) {
@@ -81,7 +82,8 @@ end_recv_port_y(int i, int j, int k,
   return mp_send_buffer( g->mp_y, port );
 }
 
-void begin_send_port_y(int i, int j, int k,
+void 
+begin_send_port_y(int i, int j, int k,
                        int size,
                        const grid_t * g,
                        char * send_buf) {
@@ -91,7 +93,8 @@ void begin_send_port_y(int i, int j, int k,
   mp_begin_send(g->mp_y, port, size, dst, port);
 }
 
-void end_send_port_y(int i, int j, int k,
+void 
+end_send_port_y(int i, int j, int k,
                      const grid_t * g) {
   int port = BOUNDARY(i, j, k), dst = g->bc[port];
   if (dst < 0 || dst > world_size) return;

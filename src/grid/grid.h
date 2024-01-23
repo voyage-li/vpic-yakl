@@ -353,6 +353,8 @@ void begin_recv_port_kokkos(const grid_t *g, int port, int size, int tag,
                             char *ALIGNED(128) recv_buf);
 void begin_recv_port_k(int i, int j, int k, int size, const grid_t *g,
                        char *recv_buf);
+void begin_recv_port_y (int i, int j, int k, int size, const grid_t *g,
+                        char* recv_buf);
 
 // Begin sending size bytes of the buffer out the given port.  Only
 // one message send may be pending at a time on a given port.  (FIXME:
@@ -362,6 +364,8 @@ void begin_send_port_kokkos(const grid_t *g, int port, int size, int tag,
                             char *ALIGNED(128) send_buf);
 void begin_send_port_k(int i, int j, int k, int size, const grid_t *g,
                        char *send_buf);
+void begin_send_port_y(int i, int j, int k, int size, const grid_t * g,
+                       char * send_buf);
 
 // Complete the pending recv on the given port.  Only valid to call if
 // there is a pending recv.  Received data put into original receive buffer
@@ -369,6 +373,8 @@ void begin_send_port_k(int i, int j, int k, int size, const grid_t *g,
 // GIVEN IN BEGIN_RECV DOES NOT MATCH END_RECV??)
 void end_recv_port_kokkos(const grid_t *g, int port);
 void *end_recv_port_k(int i, int j, int k, const grid_t *g);
+void *end_recv_port_y(int i, int j, int k, const grid_t *g);
+
 
 // Complete the pending send on the given port.  Only valid to call if
 // there is a pending send on the port.  Note that this guarantees
@@ -377,6 +383,7 @@ void *end_recv_port_k(int i, int j, int k, const grid_t *g);
 // port.
 void end_send_port_kokkos(const grid_t *g, int port);
 void end_send_port_k(int i, int j, int k, const grid_t *g);
+void end_send_port_y(int i, int j, int k, const grid_t * g);
 
 // In distribute_voxels.c
 
